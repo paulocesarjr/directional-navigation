@@ -54,6 +54,8 @@ export default class Navigator {
     this._lastSectionId = ''
     this._duringFocusChange = false
     this._focusedPath = null
+    this._document = (config && config.documentRef) || document
+    this._window = (config && config.windowRef) || window
   }
 
   init() {
@@ -81,25 +83,25 @@ export default class Navigator {
   }
 
   bindEvents() {
-    this.addEventListener(window, 'click', this._onMouseClickOrDown)
-    this.addEventListener(window, 'mouseover', this._onMouseOver)
-    this.addEventListener(window, 'mousedown', this._onMouseClickOrDown)
-    this.addEventListener(window, 'keydown', this._onKeyDown)
-    this.addEventListener(window, 'keyup', this._onKeyUp)
-    this.addEventListener(window, 'focus', this._onFocus, true)
-    this.addEventListener(window, 'blur', this._onBlur, true)
-    this.addEventListener(document, `${this._config.eventPrefix}focused`, this._handleFocused)
+    this.addEventListener(this._window, 'click', this._onMouseClickOrDown)
+    this.addEventListener(this._window, 'mouseover', this._onMouseOver)
+    this.addEventListener(this._window, 'mousedown', this._onMouseClickOrDown)
+    this.addEventListener(this._window, 'keydown', this._onKeyDown)
+    this.addEventListener(this._window, 'keyup', this._onKeyUp)
+    this.addEventListener(this._window, 'focus', this._onFocus, true)
+    this.addEventListener(this._window, 'blur', this._onBlur, true)
+    this.addEventListener(this._document, `${this._config.eventPrefix}focused`, this._handleFocused)
   }
 
   unbindEvents() {
-    this.removeEventListener(window, 'click', this._onMouseClickOrDown)
-    this.removeEventListener(window, 'mouseover', this._onMouseOver)
-    this.removeEventListener(window, 'mousedown', this._onMouseClickOrDown)
-    this.removeEventListener(window, 'keydown', this._onKeyDown)
-    this.removeEventListener(window, 'keyup', this._onKeyUp)
-    this.removeEventListener(window, 'focus', this._onFocus, true)
-    this.removeEventListener(window, 'blur', this._onBlur, true)
-    this.removeEventListener(document, `${this._config.eventPrefix}focused`, this._handleFocused)
+    this.removeEventListener(this._window, 'click', this._onMouseClickOrDown)
+    this.removeEventListener(this._window, 'mouseover', this._onMouseOver)
+    this.removeEventListener(this._window, 'mousedown', this._onMouseClickOrDown)
+    this.removeEventListener(this._window, 'keydown', this._onKeyDown)
+    this.removeEventListener(this._window, 'keyup', this._onKeyUp)
+    this.removeEventListener(this._window, 'focus', this._onFocus, true)
+    this.removeEventListener(this._window, 'blur', this._onBlur, true)
+    this.removeEventListener(this._document, `${this._config.eventPrefix}focused`, this._handleFocused)
   }
 
   // set(<config>)
@@ -256,7 +258,7 @@ export default class Navigator {
   }
 
   addFocusable(config, onEnterPressHandler) {
-    if (!config || this._getSectionId(document.getElementById(config.id)))
+    if (!config || this._getSectionId(this._document.getElementById(config.id)))
       return
 
     this.removeFocusable(config)
@@ -270,7 +272,7 @@ export default class Navigator {
   }
 
   removeFocusable(config, onEnterPressHandler) {
-    const sectionId = this._getSectionId(document.getElementById(config.id))
+    const sectionId = this._getSectionId(this._document.getElementById(config.id))
     if (!sectionId)
       return
 
@@ -675,8 +677,8 @@ export default class Navigator {
   }
 
   _getCurrentFocusedElement() {
-    const { activeElement } = document
-    if (activeElement && activeElement !== document.body)
+    const { activeElement } = this._document
+    if (activeElement && activeElement !== this._document.body)
       return activeElement
   }
 
@@ -796,7 +798,7 @@ export default class Navigator {
 
   _onFocus = evt => {
     const { target } = evt
-    if (target !== window && target !== document && this._sectionCount && !this._duringFocusChange) {
+    if (target !== this._window && target !== this._document && this._sectionCount && !this._duringFocusChange) {
       const sectionId = this._getSectionId(target)
       if (sectionId) {
         if (this._pause) {
@@ -824,8 +826,8 @@ export default class Navigator {
 
   _onBlur = evt => {
     const { target } = evt
-    if (target !== window
-      && target !== document
+    if (target !== this._window
+      && target !== this._document
       && !this._pause
       && this._sectionCount
       && !this._duringFocusChange
